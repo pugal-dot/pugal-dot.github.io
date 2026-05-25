@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pugazhenthi S | Full-Stack Developer & AI Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,200;0,14..32,300;0,14..32,400;0,14..32,500;1,14..32,300;1,14..32,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ────────────────────────────────────
+       0. RESET & VARIABLES
+    ──────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:    #f0f0f0;
+      --fg:    #080808;
+      --mid:   #aaaaaa;
+      --dim:   #888888;
+      --dark:  #080808;
+      --sans:  'Inter', sans-serif;
+      --mono:  'Space Mono', monospace;
+    }
+    html { font-size: 10px; scroll-behavior: auto; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--sans);
+      font-size: 1.4rem;
+      font-weight: 400;
+      overflow-x: hidden;
+      cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='22' viewBox='0 0 14 22'><path d='M1,1L1,18L5,14L7.5,21L10,20L7.5,13L13,13Z' fill='white' stroke='%23222' stroke-width='1.2' stroke-linejoin='round'/></svg>") 0 0, default;
+    }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ────────────────────────────────────
+       1. GRAIN CANVAS
+    ──────────────────────────────────── */
+    #grain-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.025;
+      mix-blend-mode: multiply;
+    }
+
+    /* ────────────────────────────────────
+       2. CUSTOM CURSOR
+    ──────────────────────────────────── */
+    .cursor-dot { display: none; }
+    .cursor-ring { display: none; }
+
+    /* ────────────────────────────────────
+       3. PRELOADER
+    ──────────────────────────────────── */
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 8000;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: 4rem 4rem 6rem;
+      pointer-events: none;
+    }
+    .loader-name {
+      font-family: var(--sans);
+      font-size: clamp(4rem, 7vw, 9rem);
+      font-weight: 400;
+      text-transform: uppercase;
+      color: var(--fg);
+      letter-spacing: -.02em;
+      line-height: 1;
+      overflow: hidden;
+    }
+    .loader-name .char {
+      display: inline-block;
+      transform: translateY(110%);
+    }
+    .loader-blurb {
+      font-family: var(--mono);
+      font-size: clamp(0.9rem, 1.4vw, 1.2rem);
+      font-weight: 400;
+      text-transform: uppercase;
+      color: rgba(8,8,8,.55);
+      letter-spacing: .08em;
+      margin-top: 1.2rem;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    .loader-bar-wrap {
+      width: 100%;
+      height: 1px;
+      background: rgba(8,8,8,.12);
+      margin-top: 2.8rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .loader-bar-fill {
+      position: absolute;
+      left: 0; top: 0;
+      height: 100%;
+      width: 0;
+      background: var(--fg);
+      transition: width 1.8s cubic-bezier(.16,1,.3,1);
+    }
+    .loader-counter {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      color: var(--dim);
+      text-transform: uppercase;
+      margin-top: 1.6rem;
+      letter-spacing: .12em;
+    }
+
+    /* ────────────────────────────────────
+       4. ABOUT OVERLAY
+    ──────────────────────────────────── */
+    .about-overlay {
+      position: fixed;
+      top: 0; right: 0;
+      width: min(54rem, 100%);
+      height: 100vh;
+      background: rgba(8,8,8,.97);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      z-index: 7000;
+      transform: translateX(100%);
+      transition: transform .75s cubic-bezier(.16,1,.3,1);
+      overflow-y: auto;
+      padding: 3.2rem 3.6rem 6rem;
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      gap: 3.2rem;
+    }
+    .about-overlay.is-open { transform: translateX(0); }
+    .about-close {
+      align-self: flex-end;
+      font-size: 2.4rem;
+      font-weight: 300;
+      cursor: inherit;
+      color: #f0f0f0;
+      line-height: 1;
+      background: none;
+      border: none;
+      padding: .6rem 1rem;
+      transition: opacity .2s;
+    }
+    .about-close:hover { opacity: .4; }
+    .about-bio {
+      font-size: 1.6rem;
+      line-height: 1.65;
+      font-weight: 300;
+      color: rgba(240,240,240,.78);
+    }
+    .about-section-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.4rem;
+    }
+    .about-section h6 {
+      font-family: var(--mono);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: rgba(240,240,240,.3);
+      margin-bottom: 1.2rem;
+    }
+    .about-section ul li {
+      font-size: 1.3rem;
+      font-weight: 300;
+      line-height: 2;
+      color: rgba(240,240,240,.72);
+    }
+    .about-contact-row {
+      margin-top: auto;
+      display: flex;
+      gap: 2.4rem;
+    }
+    .about-contact-row a {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      letter-spacing: .1em;
+      color: rgba(240,240,240,.45);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    /* ────────────────────────────────────
+       5. HEADER / NAV
+    ──────────────────────────────────── */
+    .site-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 6000;
+      padding: 2.4rem 3.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform .45s cubic-bezier(.16,1,.3,1);
+      mix-blend-mode: normal;
+    }
+    .site-header.is-hidden { transform: translateY(-100%); }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 3.2rem;
+    }
+    .header-logo {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--fg);
+    }
+    .header-tagline {
+      font-family: var(--mono);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: rgba(8,8,8,.45);
+    }
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    .nav-link {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--fg);
+      cursor: inherit;
+      background: none;
+      border: none;
+      overflow: hidden;
+      display: block;
+      position: relative;
+    }
+    .nav-link-inner {
+      display: block;
+      transition: transform .4s cubic-bezier(.16,1,.3,1);
+    }
+    .nav-link-inner-clone {
+      display: block;
+      position: absolute;
+      top: 100%; left: 0;
+      transition: transform .4s cubic-bezier(.16,1,.3,1);
+    }
+    .nav-link:hover .nav-link-inner { transform: translateY(-100%); }
+    .nav-link:hover .nav-link-inner-clone { transform: translateY(-100%); }
+
+    /* ────────────────────────────────────
+       6. HERO SECTION
+    ──────────────────────────────────── */
+    .hero-section {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      min-height: 60rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 3.2rem 14rem;
+      overflow: hidden;
+    }
+    .hero-sub {
+      font-family: var(--sans);
+      font-size: 4.8rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      color: var(--fg);
+      letter-spacing: -.01em;
+      line-height: 1.2;
+      overflow: hidden;
+    }
+    .hero-sub .hw { display: inline-block; transform: translateY(110%); }
+    .hero-name {
+      font-family: var(--sans);
+      font-size: clamp(5rem, 11vw, 18rem);
+      font-weight: 500;
+      text-transform: uppercase;
+      color: var(--fg);
+      letter-spacing: -.03em;
+      line-height: .92;
+      overflow: hidden;
+    }
+    .hero-name .hw { display: inline-block; transform: translateY(110%); }
+    .hero-meta {
+      position: absolute;
+      bottom: 14rem;
+      right: 3.2rem;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+    }
+    .hero-social-links {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1.2rem;
+    }
+    .hero-social-link {
+      font-family: var(--sans);
+      font-size: 1.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: -.01em;
+      color: #080808;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      transition: opacity .2s;
+    }
+    .hero-social-link:hover {
+      opacity: 0.6;
+    }
+    .hero-social-sep {
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #080808;
+    }
+    .hero-social-sub {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #080808;
+      margin-top: .2rem;
+    }
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 3.6rem;
+      left: 3.2rem;
+      font-family: var(--mono);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: #080808;
+      font-weight: 700;
+    }
+
+    /* hero contact row */
+    .hero-contact-row {
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      margin-top: 2.4rem;
+      opacity: 0;
+    }
+    .hero-contact-link {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      color: #080808;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .hero-contact-link:hover { opacity: 0.6; }
+    .hero-contact-sep {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #080808;
+    }
+
+    /* kv-bottom: fixed tagline */
+    .kv-bottom {
+      position: fixed;
+      bottom: 3.6rem;
+      right: 3.2rem;
+      text-align: right;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .kv-bottom p {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: -.04em;
+      color: rgba(8,8,8,.45);
+      line-height: 1.7;
+    }
+
+    /* ────────────────────────────────────
+       7. INTRO WHITE SECTION
+    ──────────────────────────────────── */
+    .intro-section {
+      background: var(--bg);
+      width: 100%;
+      min-height: 70vh;
+      display: flex;
+      align-items: center;
+      padding: 10rem 3.2rem;
+      position: relative;
+      z-index: 10;
+    }
+    .intro-text {
+      font-size: clamp(3rem, 4vw, 4.8rem);
+      font-weight: 400;
+      text-transform: uppercase;
+      color: #080808;
+      letter-spacing: -.02em;
+      line-height: 1.15;
+      max-width: 90rem;
+    }
+    .intro-text em {
+      font-style: italic;
+      color: rgba(8,8,8,.35);
+    }
+
+    /* ── (showreel + marquee removed) ── */
+
+    /* ────────────────────────────────────
+       11. PROJECTS SECTION
+    ──────────────────────────────────── */
+    .projects-section {
+      background: #080808;
+      position: relative;
+      z-index: 10;
+      padding: 10rem 0 0;
+      overflow: hidden;
+    }
+    .projects-giant-title {
+      font-size: clamp(8rem, 22vw, 28rem);
+      font-weight: 500;
+      text-transform: uppercase;
+      color: rgba(240,240,240,.5);
+      letter-spacing: -.04em;
+      line-height: 1;
+      white-space: nowrap;
+      padding: 0 3.2rem;
+      margin-bottom: -2rem;
+      will-change: transform;
+      display: block;
+    }
+    .projects-sub-heading {
+      font-size: clamp(2rem, 4vw, 5.5rem);
+      font-weight: 400;
+      text-transform: uppercase;
+      color: rgba(240,240,240,.62);
+      letter-spacing: -.03em;
+      line-height: 1.2;
+      overflow: hidden;
+      padding: 0 3.2rem;
+      margin-bottom: 6rem;
+    }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .proj-card {
+      position: relative;
+      overflow: hidden;
+      cursor: inherit;
+      aspect-ratio: 4/3;
+      background: #111;
+    }
+    .proj-card:nth-child(odd) { border-right: 1px solid rgba(240,240,240,.06); }
+    .proj-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .7s cubic-bezier(.16,1,.3,1);
+      filter: brightness(.6);
+    }
+    .proj-card:hover .proj-card-img { transform: scale(1.04); }
+    .proj-card-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .7s cubic-bezier(.16,1,.3,1);
+      filter: brightness(.7);
+    }
+    .proj-card:hover .proj-card-placeholder { transform: scale(1.04); }
+    .proj-card-overlay {
+      position: absolute;
+      inset: 0;
+      padding: 3.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 60%);
+    }
+    .proj-card-num {
+      font-family: var(--mono);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: rgba(240,240,240,.4);
+      margin-bottom: 1rem;
+    }
+    .proj-card-title {
+      font-size: clamp(2.4rem, 3vw, 4rem);
+      font-weight: 400;
+      text-transform: uppercase;
+      color: #f0f0f0;
+      letter-spacing: -.02em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    .proj-card-desc {
+      font-size: 1.3rem;
+      font-weight: 300;
+      color: rgba(240,240,240,.6);
+      line-height: 1.5;
+      max-width: 46rem;
+      transform: translateY(1rem);
+      opacity: 0;
+      transition: opacity .4s, transform .4s;
+    }
+    .proj-card:hover .proj-card-desc { opacity: 1; transform: translateY(0); }
+    .proj-card-cta {
+      font-family: var(--mono);
+      font-size: .95rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #fff;
+      margin-top: 1.6rem;
+      display: inline-block;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.35);
+      padding: .5rem 1.4rem;
+      border-radius: 2rem;
+      transform: translateY(1rem);
+      opacity: 0;
+      transition: opacity .4s .06s, transform .4s .06s, background .25s, border-color .25s;
+      backdrop-filter: blur(6px);
+    }
+    .proj-card:hover .proj-card-cta {
+      opacity: 1;
+      transform: translateY(0);
+      background: rgba(255,255,255,.28);
+      border-color: rgba(255,255,255,.7);
+    }
+
+    /* ────────────────────────────────────
+       PROJECT DETAIL MODAL
+    ──────────────────────────────────── */
+    .proj-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 6500;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .proj-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(8,8,8,.55);
+      opacity: 0;
+      transition: opacity .55s cubic-bezier(.16,1,.3,1);
+    }
+    .proj-modal.is-open { pointer-events: all; }
+    .proj-modal.is-open .proj-modal-backdrop { opacity: 1; }
+    .proj-modal-inner {
+      position: absolute;
+      top: 0; right: 0;
+      width: min(72rem, 100%);
+      height: 100vh;
+      background: #0c0c0c;
+      border-left: 1px solid rgba(240,240,240,.07);
+      transform: translateX(100%);
+      transition: transform .75s cubic-bezier(.16,1,.3,1);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      padding: 3.2rem 3.6rem 6rem;
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      gap: 2.4rem;
+      z-index: 1;
+    }
+    .proj-modal.is-open .proj-modal-inner { transform: translateX(0); }
+    .proj-modal-header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .proj-modal-close {
+      font-size: 2.4rem;
+      font-weight: 300;
+      cursor: inherit;
+      color: #f0f0f0;
+      background: none;
+      border: none;
+      line-height: 1;
+      padding: .6rem 1rem;
+      transition: opacity .2s;
+    }
+    .proj-modal-close:hover { opacity: .4; }
+    .proj-modal-num {
+      font-family: var(--mono);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: rgba(240,240,240,.28);
+      margin-bottom: 1rem;
+    }
+    .proj-modal-title {
+      font-size: clamp(4rem, 7vw, 9rem);
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: -.03em;
+      line-height: .92;
+      margin-bottom: 2.8rem;
+      color: #f0f0f0;
+    }
+    .proj-modal-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      padding: 2.4rem 0;
+      border-top: 1px solid rgba(240,240,240,.08);
+      border-bottom: 1px solid rgba(240,240,240,.08);
+    }
+    .proj-modal-meta-item label {
+      font-family: var(--mono);
+      font-size: .9rem;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: rgba(240,240,240,.28);
+      display: block;
+      margin-bottom: .6rem;
+    }
+    .proj-modal-meta-item span {
+      font-size: 1.4rem;
+      font-weight: 300;
+      color: #f0f0f0;
+    }
+    .proj-modal-img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      opacity: .72;
+      border-radius: .3rem;
+      display: block;
+    }
+    .proj-modal-img-placeholder {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: .3rem;
+    }
+    .proj-modal-desc {
+      font-size: 1.5rem;
+      line-height: 1.75;
+      font-weight: 300;
+      color: rgba(240,240,240,.75);
+      margin: 0;
+    }
+    .proj-modal-section-label {
+      font-family: var(--mono);
+      font-size: .85rem;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: rgba(240,240,240,.3);
+      margin-bottom: .6rem;
+      padding-bottom: .6rem;
+      border-bottom: 1px solid rgba(240,240,240,.06);
+    }
+    .proj-modal-section {
+      display: flex;
+      flex-direction: column;
+      gap: .8rem;
+    }
+    .proj-modal-cloud {
+      font-size: 1.35rem;
+      line-height: 1.75;
+      font-weight: 300;
+      color: rgba(200,225,255,.72);
+      background: rgba(100,160,255,.06);
+      border-left: 2px solid rgba(100,160,255,.3);
+      padding: 1.2rem 1.6rem;
+      border-radius: 0 .4rem .4rem 0;
+      margin: 0;
+    }
+    .proj-modal-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    .proj-modal-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+    }
+    .proj-modal-tag {
+      font-family: var(--mono);
+      font-size: .85rem;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      color: rgba(240,240,240,.7);
+      border: 1px solid rgba(240,240,240,.14);
+      padding: .4rem 1rem;
+      border-radius: 2rem;
+      white-space: nowrap;
+    }
+    .proj-modal-tag-tool {
+      color: rgba(240,240,240,.4);
+      border-color: rgba(240,240,240,.07);
+    }
+    .proj-modal-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .proj-modal-features li {
+      font-size: 1.4rem;
+      font-weight: 300;
+      color: rgba(240,240,240,.65);
+      line-height: 1.55;
+      padding-left: 2rem;
+      position: relative;
+    }
+    .proj-modal-features li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: rgba(240,240,240,.25);
+    }
+    @media (max-width: 768px) {
+      .proj-modal-inner { padding: 2.4rem 2rem 5rem; }
+      .proj-modal-meta { grid-template-columns: 1fr; }
+      .proj-modal-two-col { grid-template-columns: 1fr; }
+    }
+
+    /* ────────────────────────────────────
+       12. FOOTER / OUTRO
+    ──────────────────────────────────── */
+    .outro-section {
+      background: var(--bg);
+      padding: 12rem 3.2rem 6rem;
+      position: relative;
+      z-index: 10;
+    }
+    .outro-cta {
+      font-size: clamp(3.2rem, 5vw, 6.4rem);
+      font-weight: 400;
+      text-transform: uppercase;
+      color: #080808;
+      letter-spacing: -.025em;
+      line-height: 1.1;
+      max-width: 80rem;
+      margin-bottom: 8rem;
+    }
+    .outro-cta em {
+      font-style: italic;
+      color: rgba(8,8,8,.3);
+    }
+    .outro-cta a {
+      text-decoration: underline;
+      text-underline-offset: 6px;
+      text-decoration-color: rgba(8,8,8,.3);
+      color: inherit;
+    }
+    .outro-bottom {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 3.2rem;
+      flex-wrap: wrap;
+    }
+    .outro-credit {
+      font-family: var(--mono);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: rgba(8,8,8,.35);
+    }
+    .outro-socials {
+      display: flex;
+      gap: 3.2rem;
+    }
+    .outro-socials a {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: #080808;
+      overflow: hidden;
+      display: block;
+      position: relative;
+    }
+    .outro-socials a .s-inner { display: block; transition: transform .4s cubic-bezier(.16,1,.3,1); }
+    .outro-socials a .s-clone { display: block; position: absolute; top: 100%; left: 0; transition: transform .4s cubic-bezier(.16,1,.3,1); }
+    .outro-socials a:hover .s-inner { transform: translateY(-100%); }
+    .outro-socials a:hover .s-clone  { transform: translateY(-100%); }
+    .outro-back-top {
+      font-family: var(--mono);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: rgba(8,8,8,.35);
+      cursor: inherit;
+      background: none;
+      border: none;
+    }
+
+    /* ────────────────────────────────────
+       10b. EDUCATION SECTION
+    ──────────────────────────────────── */
+    .edu-section {
+      background: var(--bg);
+      padding: 10rem 0 0;
+      position: relative;
+      z-index: 10;
+    }
+    .sec-header {
+      padding: 0 3.2rem;
+      margin-bottom: 5rem;
+    }
+    .sec-tag {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: #080808;
+      margin-bottom: 2rem;
+    }
+    .sec-tag::before { content: '/ '; }
+    .edu-list {
+      width: 100%;
+      border-top: 1px solid rgba(8,8,8,.1);
+    }
+    .edu-item {
+      border-bottom: 1px solid rgba(8,8,8,.1);
+      padding: 3.2rem 3.2rem;
+      display: grid;
+      grid-template-columns: 4rem 1fr auto;
+      align-items: center;
+      gap: 2.4rem;
+    }
+    .edu-num {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      color: #080808;
+    }
+    .edu-main h3 {
+      font-size: clamp(2rem, 3vw, 3.6rem);
+      font-weight: 400;
+      text-transform: uppercase;
+      color: var(--fg);
+      letter-spacing: -.02em;
+      line-height: 1.1;
+      margin-bottom: .6rem;
+    }
+    .edu-main p {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #080808;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .edu-meta {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .edu-grade {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #080808;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .edu-period {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 700;
+      color: #080808;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    /* ────────────────────────────────────
+       10c. SKILLS SECTION
+    ──────────────────────────────────── */
+    .skills-section {
+      background: var(--bg);
+      padding: 10rem 0 0;
+      position: relative;
+      z-index: 10;
+    }
+    .skills-list {
+      width: 100%;
+      border-top: 1px solid rgba(8,8,8,.1);
+    }
+    .skill-item {
+      border-bottom: 1px solid rgba(8,8,8,.1);
+      padding: 2.4rem 3.2rem;
+      display: grid;
+      grid-template-columns: 18rem 1fr auto;
+      align-items: center;
+      gap: 2.4rem;
+      transition: opacity .3s;
+    }
+    .skills-list:hover .skill-item:not(:hover) { opacity: .2; }
+    .skill-cat {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #080808;
+    }
+    .skill-vals {
+      font-size: clamp(1.6rem, 2vw, 2.4rem);
+      font-weight: 400;
+      text-transform: uppercase;
+      color: var(--fg);
+      letter-spacing: -.01em;
+    }
+
+    /* ────────────────────────────────────
+       10d. CERTIFICATIONS SECTION
+    ──────────────────────────────────── */
+    .certs-section {
+      background: var(--bg);
+      padding: 10rem 0 6rem;
+      position: relative;
+      z-index: 10;
+    }
+    .certs-list {
+      width: 100%;
+      border-top: 1px solid rgba(8,8,8,.1);
+    }
+    .cert-item {
+      border-bottom: 1px solid rgba(8,8,8,.1);
+      padding: 2.4rem 3.2rem;
+      display: grid;
+      grid-template-columns: 4rem 1fr auto;
+      grid-template-rows: auto auto;
+      align-items: start;
+      gap: 0.4rem 2.4rem;
+      transition: opacity .3s;
+    }
+    .cert-blurb {
+      grid-column: 2 / 3;
+      font-size: 1.2rem;
+      color: rgba(8,8,8,.45);
+      font-family: var(--sans);
+      font-weight: 300;
+      margin-top: 0.4rem;
+      line-height: 1.6;
+      letter-spacing: 0.01em;
+    }
+    .certs-list:hover .cert-item:not(:hover) { opacity: .2; }
+    .cert-num {
+      font-family: var(--mono);
+      font-size: 1rem;
+      letter-spacing: .1em;
+      color: rgba(8,8,8,.25);
+    }
+    .cert-name {
+      font-size: clamp(1.6rem, 2.2vw, 2.8rem);
+      font-weight: 400;
+      text-transform: uppercase;
+      color: var(--fg);
+      letter-spacing: -.015em;
+    }
+    .cert-issuer {
+      font-family: var(--mono);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: rgba(8,8,8,.4);
+      white-space: nowrap;
+    }
+
+    /* ────────────────────────────────────
+       13. SCROLL REVEAL UTIL
+    ──────────────────────────────────── */
+    .rv {
+      opacity: 0;
+      transform: translateY(2.4rem);
+    }
+
+    /* ────────────────────────────────────
+       14. MOBILE
+    ──────────────────────────────────── */
+    @media (max-width: 768px) {
+      .site-header { padding: 2rem 2rem; }
+      .header-tagline { display: none; }
+      .hero-section { padding: 0 2rem 12rem; }
+      .intro-section { padding: 6rem 2rem; }
+      .edu-item, .skill-item, .cert-item { grid-template-columns: 1fr; gap: 1rem; padding: 2rem; }
+      .edu-meta { text-align: left; }
+      .cert-issuer { white-space: normal; }
+      .projects-section { padding: 6rem 0 0; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .proj-card:nth-child(odd) { border-right: none; border-bottom: 1px solid rgba(240,240,240,.08); }
+      .kv-bottom { display: none; }
+      .outro-section { padding: 8rem 2rem 4rem; }
+      .outro-bottom { flex-direction: column; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── GRAIN CANVAS ── -->
+<canvas id="grain-canvas" aria-hidden="true"></canvas>
+
+<!-- ── CURSOR ── -->
+<div class="cursor-dot" id="cursor-dot"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- ── PRELOADER ── -->
+<div class="loader" id="loader">
+  <div class="loader-name" id="loader-name"></div>
+  <div class="loader-blurb" id="loader-blurb">Creative Development &amp; AI Engineering</div>
+  <div class="loader-bar-wrap">
+    <div class="loader-bar-fill" id="loader-bar"></div>
+  </div>
+  <p class="loader-counter" id="loader-counter">000</p>
+</div>
+
+<!-- ── ABOUT OVERLAY ── -->
+<div class="about-overlay" id="about-overlay" aria-hidden="true">
+  <button class="about-close" id="about-close" aria-label="Close about">×</button>
+  <p class="about-bio rv">
+    Pugazhenthi S is a full-stack developer and AI engineer based in Trichy, Tamil Nadu, India.<br><br>
+    Currently completing his B.Tech in Computer Science at SASTRA Deemed University (2026),
+    he builds production-ready systems that fuse AI, cloud infrastructure, and clean engineering —
+    from LLM-powered platforms to cross-platform mobile apps.
+  </p>
+  <div class="about-section-grid">
+    <div class="about-section rv">
+      <h6>Education</h6>
+      <ul>
+        <li>SASTRA Deemed University 22 – 26</li>
+        <li>B.Tech CSE · CGPA 5.91 / 10</li>
+      </ul>
+    </div>
+    <div class="about-section rv">
+      <h6>Certifications</h6>
+      <ul>
+        <li>AWS Cloud Practitioner (Amazon)</li>
+        <li>Cisco CCNA 200-301 (Udemy)</li>
+        <li>AI Fluency (Anthropic)</li>
+        <li>Claude Code in Action (Anthropic)</li>
+        <li>Claude with the Anthropic API (Anthropic)</li>
+      </ul>
+    </div>
+    <div class="about-section rv">
+      <h6>Skills</h6>
+      <ul>
+        <li>Python · TypeScript · Java</li>
+        <li>Next.js · React Native · Django</li>
+        <li>AWS · Vercel · Render · Supabase</li>
+        <li>Groq LLaMA · Claude API · RAG</li>
+      </ul>
+    </div>
+  </div>
+  <div class="about-contact-row rv" style="flex-wrap: wrap; gap: 1.6rem 2.4rem;">
+    <a href="https://mail.google.com/mail/?view=cm&to=nimisiva1947@gmail.com" target="_blank">nimisiva1947@gmail.com</a>
+    <a href="tel:+919600453662">+91 9600453662</a>
+    <a href="https://github.com/pugal-dot" target="_blank">GitHub</a>
+    <a href="https://www.linkedin.com/in/pugazhenthi-s-866b70278/" target="_blank">LinkedIn</a>
+  </div>
+</div>
+
+<!-- ── HEADER ── -->
+<header class="site-header" id="site-header">
+  <div class="header-left">
+  </div>
+  <nav class="header-nav">
+    <a href="https://mail.google.com/mail/?view=cm&to=nimisiva1947@gmail.com" target="_blank" class="nav-link">
+      <span class="nav-link-inner">(Contact)</span>
+      <span class="nav-link-inner-clone">(Contact)</span>
+    </a>
+    <button class="nav-link" id="about-btn" aria-controls="about-overlay">
+      <span class="nav-link-inner">(About)</span>
+      <span class="nav-link-inner-clone">(About)</span>
+    </button>
+  </nav>
+</header>
+
+<main>
+  <!-- ── HERO ── -->
+  <section class="hero-section" id="hero">
+    <h1 class="hero-name">
+      <span class="hw">P</span><span class="hw">U</span><span class="hw">G</span><span class="hw">A</span><span class="hw">Z</span><span class="hw">H</span><span class="hw">E</span><span class="hw">N</span><span class="hw">T</span><span class="hw">H</span><span class="hw">I</span>
+    </h1>
+    <div class="hero-contact-row">
+      <a href="https://mail.google.com/mail/?view=cm&to=nimisiva1947@gmail.com" target="_blank" class="hero-contact-link">nimisiva1947@gmail.com</a>
+      <span class="hero-contact-sep">·</span>
+      <a href="tel:+919600453662" class="hero-contact-link">+91 9600453662</a>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-social-links">
+        <a href="https://github.com/pugal-dot" target="_blank" class="hero-social-link">GitHub</a>
+        <span class="hero-social-sep">/</span>
+        <a href="https://www.linkedin.com/in/pugazhenthi-s-866b70278/" target="_blank" class="hero-social-link">LinkedIn</a>
+      </div>
+      <span class="hero-social-sub">click to go to</span>
+    </div>
+    <span class="hero-scroll-hint">↓ Scroll</span>
+  </section>
+
+
+
+  <!-- ── INTRO ── -->
+  <section class="intro-section" id="intro">
+    <h4 class="intro-text rv">
+      I identify real-world problems, design the AI layer,<br>
+      and deploy the full stack on AWS — end to end.<br>
+      <em>LLMs, forecasting models, NLP pipelines, REST APIs</em> —<br>
+      wired into systems that actually ship to production.<br>
+      From AI-driven placement platforms to stock prediction engines,<br>
+      every build is cloud-architected, stress-tested, and scaled.<br>
+      I don't just learn tools — I use them to solve things that matter.
+    </h4>
+  </section>
+
+  <!-- ── EDUCATION ── -->
+  <section class="edu-section" id="education">
+    <div class="sec-header">
+      <p class="sec-tag rv">Education</p>
+    </div>
+    <ul class="edu-list">
+      <li class="edu-item rv">
+        <span class="edu-num">01</span>
+        <div class="edu-main">
+          <h3>SASTRA Deemed University</h3>
+          <p>B.Tech Computer Science Engineering · Tanjore, India</p>
+        </div>
+        <div class="edu-meta">
+          <span class="edu-grade">CGPA 5.91 / 10</span>
+          <span class="edu-period">2022 – 2026</span>
+        </div>
+      </li>
+      <li class="edu-item rv">
+        <span class="edu-num">02</span>
+        <div class="edu-main">
+          <h3>Kamala Niketan Montessori School</h3>
+          <p>Grade 12 – Higher Secondary Certificate (CBSE) · Trichy, India</p>
+        </div>
+        <div class="edu-meta">
+          <span class="edu-grade">65.8 %</span>
+          <span class="edu-period">2021 – 2022</span>
+        </div>
+      </li>
+      <li class="edu-item rv">
+        <span class="edu-num">03</span>
+        <div class="edu-main">
+          <h3>Kamala Niketan Montessori School</h3>
+          <p>Grade 10 – Secondary School Certificate (CBSE) · Trichy, India</p>
+        </div>
+        <div class="edu-meta">
+          <span class="edu-grade">73.8 %</span>
+          <span class="edu-period">2019 – 2020</span>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── PROJECTS ── -->
+  <section class="projects-section" id="projects">
+    <h1 class="projects-giant-title" id="proj-giant">PROJECTS</h1>
+    <p class="projects-sub-heading">Here's some of my projects — 2025/26</p>
+    <div class="projects-grid">
+
+      <div class="proj-card rv" data-project="krono">
+        <div class="proj-card-placeholder" style="background:#080808;">
+          <img class="proj-card-img" src="krono.jpeg" alt="Krono.AI">
+        </div>
+        <div class="proj-card-overlay">
+          <span class="proj-card-num">01</span>
+          <h2 class="proj-card-title">Krono.AI</h2>
+          <p class="proj-card-desc">Quantitative stock forecasting — Google's TimesFM 2.5 (200M params, local PyTorch) fused with Groq LLaMA 3.3-70B sentiment. Signal Fusion Layer delivers BUY / SELL / HOLD signals. FastAPI + React 18.</p>
+          <span class="proj-card-cta">View case study →</span>
+        </div>
+      </div>
+
+      <div class="proj-card rv" data-project="hiremind">
+        <div class="proj-card-placeholder" style="background:#080808;">
+          <img class="proj-card-img" src="hiremind.pic.jpeg" alt="HireMind">
+        </div>
+        <div class="proj-card-overlay">
+          <span class="proj-card-num">02</span>
+          <h2 class="proj-card-title">HireMind</h2>
+          <p class="proj-card-desc">Full-stack AI campus placement platform — Final Year Project, SASTRA University. Next.js 16 · Django 4.2 · Groq career coach · scikit-learn placement predictor · PostgreSQL · Vercel + Railway.</p>
+          <span class="proj-card-cta">View case study →</span>
+        </div>
+      </div>
+
+      <div class="proj-card rv" data-project="lumadot">
+        <div class="proj-card-placeholder" style="background:#080808;">
+          <img class="proj-card-img" src="luma.pic.jpeg" alt="luma.dot">
+        </div>
+        <div class="proj-card-overlay">
+          <span class="proj-card-num">03</span>
+          <h2 class="proj-card-title">luma.dot</h2>
+          <p class="proj-card-desc">Bloomberg-style dark AI news reader for iOS, Android &amp; Web. React Native · Expo SDK 54 · Groq LLaMA 3.3-70B for live summarisation &amp; sentiment · RAG article chat · Vercel + AWS Amplify.</p>
+          <span class="proj-card-cta">View case study →</span>
+        </div>
+      </div>
+
+      <div class="proj-card rv" data-project="streakify">
+        <div class="proj-card-placeholder" style="background:#080808;">
+          <img class="proj-card-img" src="streakify.jpeg" alt="Streakify">
+        </div>
+        <div class="proj-card-overlay">
+          <span class="proj-card-num">04</span>
+          <h2 class="proj-card-title">Streakify</h2>
+          <p class="proj-card-desc">Dark luxury habit-tracking platform — pure vanilla HTML5, CSS3 &amp; ES6, zero dependencies. "Aria" AI assistant rendered as five nested CSS 3D spheres, LERP cursor at 60fps, offline localStorage persistence.</p>
+          <span class="proj-card-cta">View case study →</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── SKILLS ── -->
+  <section class="skills-section" id="skills">
+    <div class="sec-header">
+      <p class="sec-tag rv">Skills</p>
+    </div>
+    <ul class="skills-list">
+      <li class="skill-item rv">
+        <span class="skill-cat">Programming</span>
+        <h3 class="skill-vals">Python · Java · TypeScript</h3>
+      </li>
+      <li class="skill-item rv">
+        <span class="skill-cat">Web &amp; Frameworks</span>
+        <h3 class="skill-vals">Next.js 16 (App Router) · React Native · Django 4.2 · Django REST Framework</h3>
+      </li>
+      <li class="skill-item rv">
+        <span class="skill-cat">Databases</span>
+        <h3 class="skill-vals">PostgreSQL · Supabase</h3>
+      </li>
+      <li class="skill-item rv">
+        <span class="skill-cat">AI &amp; APIs</span>
+        <h3 class="skill-vals">Groq API (Llama 3.3-70B) · Anthropic Claude API · Prompt Engineering · RAG · NewsAPI · scikit-learn</h3>
+      </li>
+      <li class="skill-item rv">
+        <span class="skill-cat">Cloud &amp; DevOps</span>
+        <h3 class="skill-vals">AWS (EC2 · S3 · IAM · VPC · RDS · Lambda) – AWS Cloud Practitioner Certified · Vercel · Render · AWS Amplify</h3>
+      </li>
+      <li class="skill-item rv">
+        <span class="skill-cat">Networking</span>
+        <h3 class="skill-vals">TCP/IP · Routing &amp; Switching · VLANs · Subnetting · OSI Model · OSPF · STP – Cisco CCNA 200-301</h3>
+      </li>
+      <li class="skill-item rv">
+        <span class="skill-cat">Core CS</span>
+        <h3 class="skill-vals">Data Structures &amp; Algorithms · DBMS · Computer Networks</h3>
+      </li>
+      <li class="skill-item rv">
+        <span class="skill-cat">Soft Skills</span>
+        <h3 class="skill-vals">Adaptability · Communication · Teamwork</h3>
+      </li>
+      <li class="skill-item rv">
+        <span class="skill-cat">Languages</span>
+        <h3 class="skill-vals">English · Tamil</h3>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── CERTIFICATIONS ── -->
+  <section class="certs-section" id="certifications">
+    <div class="sec-header">
+      <p class="sec-tag rv">Certifications</p>
+    </div>
+    <ul class="certs-list">
+      <li class="cert-item rv">
+        <span class="cert-num">01</span>
+        <h3 class="cert-name">AWS Cloud Practitioner Essentials</h3>
+        <span class="cert-issuer">Amazon Web Services</span>
+        <p class="cert-blurb">Covers core AWS services — EC2, S3, IAM, VPC, RDS, Lambda — plus cloud architecture principles, pricing models, and security best practices. Foundation for all my cloud deployments.</p>
+      </li>
+      <li class="cert-item rv">
+        <span class="cert-num">02</span>
+        <h3 class="cert-name">Cisco CCNA 200-301 — The Complete Guide</h3>
+        <span class="cert-issuer">Udemy · Neil Anderson · 42.5 hrs</span>
+        <p class="cert-blurb">Deep-dive into TCP/IP, routing & switching, VLANs, subnetting, OSPF, and STP. Builds the networking fundamentals that underpin every cloud and distributed system I design.</p>
+      </li>
+      <li class="cert-item rv">
+        <span class="cert-num">03</span>
+        <h3 class="cert-name">AI Fluency: Framework &amp; Foundations</h3>
+        <span class="cert-issuer">Anthropic</span>
+        <p class="cert-blurb">Covers how large language models work, responsible AI principles, and frameworks for integrating AI into real-world products — directly applied in Krono.AI and HireMind.</p>
+      </li>
+      <li class="cert-item rv">
+        <span class="cert-num">04</span>
+        <h3 class="cert-name">Claude Code in Action</h3>
+        <span class="cert-issuer">Anthropic · March 2026</span>
+        <p class="cert-blurb">Hands-on agentic coding with Claude — building multi-step AI workflows, tool use, and autonomous development pipelines. Applied directly in production-grade AI feature development.</p>
+      </li>
+      <li class="cert-item rv">
+        <span class="cert-num">05</span>
+        <h3 class="cert-name">Claude with the Anthropic API</h3>
+        <span class="cert-issuer">Anthropic · March 2026</span>
+        <p class="cert-blurb">Practical API integration — prompt engineering, tool use, streaming responses, and building production-ready LLM-powered features using the Anthropic SDK.</p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── PROJECT DETAIL MODAL ── -->
+  <div class="proj-modal" id="proj-modal" aria-hidden="true">
+    <div class="proj-modal-backdrop" id="proj-modal-backdrop"></div>
+    <div class="proj-modal-inner">
+      <div class="proj-modal-header">
+        <button class="proj-modal-close" id="proj-modal-close" aria-label="Close project">×</button>
+      </div>
+      <div id="proj-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ── OUTRO / FOOTER ── -->
+  <section class="outro-section">
+    <h4 class="outro-cta rv">
+      <a href="https://mail.google.com/mail/?view=cm&to=nimisiva1947@gmail.com" target="_blank">Contact Me</a>
+    </h4>
+    <div class="outro-bottom">
+      <span class="outro-credit">Design &amp; Dev by Pugazhenthi S</span>
+      <nav class="outro-socials">
+        <a href="https://mail.google.com/mail/?view=cm&to=nimisiva1947@gmail.com" target="_blank">
+          <span class="s-inner">nimisiva1947@gmail.com</span>
+          <span class="s-clone">nimisiva1947@gmail.com</span>
+        </a>
+        <a href="https://github.com/pugal-dot" target="_blank">
+          <span class="s-inner">GitHub</span>
+          <span class="s-clone">GitHub</span>
+        </a>
+        <a href="https://www.linkedin.com/in/pugazhenthi-s-866b70278/" target="_blank">
+          <span class="s-inner">LinkedIn</span>
+          <span class="s-clone">LinkedIn</span>
+        </a>
+      </nav>
+      <button class="outro-back-top" id="back-top">↑ Back to Top</button>
+    </div>
+  </section>
+</main>
+
+<!-- ── SCRIPTS ── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+
+<script>
+/* ====================================================
+   GRAIN CANVAS — Film noise on WebGL
+==================================================== */
+(function() {
+  const canvas = document.getElementById('grain-canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) { canvas.style.display = 'none'; return; }
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const vs = `
+    attribute vec2 a_pos;
+    void main() { gl_Position = vec4(a_pos, 0., 1.); }
+  `;
+  const fs = `
+    precision mediump float;
+    uniform float u_time;
+    uniform vec2  u_res;
+    float rand(vec2 co) {
+      return fract(sin(dot(co * u_time * 0.002, vec2(12.9898,78.233))) * 43758.5453);
+    }
+    void main() {
+      vec2 uv = gl_FragCoord.xy / u_res;
+      float n = rand(uv);
+      gl_FragColor = vec4(vec3(n), 1.);
+    }
+  `;
+
+  const makeShader = (type, src) => {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, makeShader(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, makeShader(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes  = gl.getUniformLocation(prog, 'u_res');
+
+  let t = 0;
+  function draw() {
+    t += 1;
+    gl.uniform1f(uTime, t);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ====================================================
+   LENIS SMOOTH SCROLL
+==================================================== */
+const lenis = new Lenis({ lerp: 0.085, smooth: true });
+function lenisRaf(time) { lenis.raf(time); requestAnimationFrame(lenisRaf); }
+requestAnimationFrame(lenisRaf);
+
+gsap.registerPlugin(ScrollTrigger, SplitText);
+ScrollTrigger.scrollerProxy(document.body, {
+  scrollTop(v) { return arguments.length ? lenis.scrollTo(v) : lenis.scroll; },
+  getBoundingClientRect() { return { top:0, left:0, width: window.innerWidth, height: window.innerHeight }; }
+});
+lenis.on('scroll', ScrollTrigger.update);
+
+/* ====================================================
+   CUSTOM CURSOR
+==================================================== */
+const dot  = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+(function animCursor() {
+  dot.style.left = mx + 'px';
+  dot.style.top  = my + 'px';
+  rx += (mx - rx) * 0.1;
+  ry += (my - ry) * 0.1;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(animCursor);
+})();
+
+document.querySelectorAll('a, button, .edu-item, .skill-item, .cert-item, .proj-card, .nav-link').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('is-hovering'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('is-hovering'));
+});
+
+/* ====================================================
+   PRELOADER
+==================================================== */
+(function runLoader() {
+  const loaderEl  = document.getElementById('loader');
+  const nameEl    = document.getElementById('loader-name');
+  const barEl     = document.getElementById('loader-bar');
+  const counterEl = document.getElementById('loader-counter');
+
+  // Build character spans
+  const name = 'Portfolio';
+  nameEl.innerHTML = name.split('').map(c =>
+    c === ' ' ? '<span class="char">&nbsp;</span>' : `<span class="char">${c}</span>`
+  ).join('');
+
+  const chars = nameEl.querySelectorAll('.char');
+  document.body.style.overflow = 'hidden';
+
+  // Animate chars in
+  gsap.to(chars, {
+    y: 0,
+    duration: .9,
+    ease: 'power4.out',
+    stagger: .04,
+    delay: .2,
+    onComplete() {
+      // Start bar
+      barEl.style.width = '100%';
+    }
+  });
+
+  // Animate blurb in
+  gsap.to('#loader-blurb', {
+    opacity: 1,
+    y: 0,
+    duration: .8,
+    ease: 'power3.out',
+    delay: .6
+  });
+
+  // Counter
+  let count = 0;
+  const countInterval = setInterval(() => {
+    count = Math.min(count + Math.floor(Math.random() * 12 + 4), 100);
+    counterEl.textContent = String(count).padStart(3, '0');
+    if (count >= 100) clearInterval(countInterval);
+  }, 60);
+
+  // Exit
+  setTimeout(() => {
+    gsap.to(loaderEl, {
+      y: '-100%',
+      duration: .9,
+      ease: 'power3.inOut',
+      delay: .3,
+      onComplete() {
+        loaderEl.style.display = 'none';
+        document.body.style.overflow = '';
+        runHero();
+        initScrollReveal();
+      }
+    });
+  }, 2600);
+})();
+
+/* ====================================================
+   HERO ENTRANCE
+==================================================== */
+function runHero() {
+  const hws = document.querySelectorAll('.hero-name .hw');
+  gsap.fromTo(hws, { y: '110%' }, {
+    y: '0%',
+    duration: 1.1,
+    ease: 'power4.out',
+    stagger: .035,
+    delay: .1
+  });
+  gsap.fromTo('.hero-contact-row', { opacity: 0, y: 16 }, {
+    opacity: 1, y: 0,
+    duration: .9, ease: 'power3.out', delay: .85
+  });
+  gsap.fromTo('.hero-meta', { opacity: 0, y: 20 }, {
+    opacity: 1, y: 0,
+    duration: .9, ease: 'power3.out', delay: .95
+  });
+  gsap.fromTo('.hero-scroll-hint', { opacity: 0 }, {
+    opacity: 1, duration: .8, delay: 1.3
+  });
+}
+
+/* ====================================================
+   SCROLL REVEAL
+==================================================== */
+function initScrollReveal() {
+  ScrollTrigger.batch('.rv', {
+    onEnter: batch => gsap.to(batch, {
+      opacity: 1, y: 0,
+      duration: .85,
+      ease: 'power3.out',
+      stagger: .1
+    }),
+    start: 'top 88%'
+  });
+}
+
+/* ====================================================
+   NAV HIDE / SHOW
+==================================================== */
+let lastY = 0;
+lenis.on('scroll', ({ scroll }) => {
+  const header = document.getElementById('site-header');
+  if (scroll > lastY && scroll > 120) {
+    header.classList.add('is-hidden');
+  } else {
+    header.classList.remove('is-hidden');
+  }
+  lastY = scroll;
+});
+
+/* ====================================================
+   ABOUT OVERLAY
+==================================================== */
+const overlay    = document.getElementById('about-overlay');
+const aboutBtn   = document.getElementById('about-btn');
+const aboutClose = document.getElementById('about-close');
+
+aboutBtn.addEventListener('click', () => {
+  overlay.classList.add('is-open');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+});
+
+function closeAbout() {
+  overlay.classList.remove('is-open');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+aboutClose.addEventListener('click', closeAbout);
+overlay.addEventListener('click', e => { if (e.target === overlay) closeAbout(); });
+
+
+/* ====================================================
+   PROJECTS — CURSOR-FOLLOWING IMAGE PREVIEW
+==================================================== */
+// (no hover preview needed — proj cards use inline images)
+
+/* ====================================================
+   PROJECTS GIANT TITLE — HORIZONTAL DRIFT ON SCROLL
+==================================================== */
+const projGiant = document.getElementById('proj-giant');
+ScrollTrigger.create({
+  trigger: '.projects-section',
+  start: 'top bottom',
+  end: 'bottom top',
+  onUpdate(self) {
+    const p = self.progress;
+    gsap.set(projGiant, { x: -p * (projGiant.scrollWidth * .18) });
+  }
+});
+
+/* ====================================================
+   BACK TO TOP
+==================================================== */
+document.getElementById('back-top').addEventListener('click', () => {
+  lenis.scrollTo(0, { duration: 1.8, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+});
+
+/* ====================================================
+   PROJECT DETAIL MODAL
+==================================================== */
+const projectData = {
+  krono: {
+    num: '01',
+    title: 'Krono.AI',
+    role: 'Solo Developer',
+    period: '2025',
+    image: 'krono.jpeg',
+    desc: 'Quantitative stock forecasting terminal that fuses Google\'s TimesFM 2.5 — a 200M-parameter model (~925 MB, running locally via PyTorch) — with Groq LLaMA 3.3-70B for real-time sentiment analysis. A custom Signal Fusion Layer blends 70% quantitative prediction with 30% sentiment score to generate clear BUY / SELL / HOLD trading signals with confidence metrics.',
+    stack: ['FastAPI', 'React 18', 'Recharts', 'yfinance', 'PyTorch', 'TimesFM 2.5', 'Groq LLaMA 3.3-70B', 'AioSQLite', 'Pandas'],
+    cloudDetails: 'Fully local architecture — TimesFM 2.5 (~925 MB) runs entirely on-device via PyTorch, eliminating cloud GPU costs. FastAPI serves the REST backend on localhost. React 18 frontend built with Vite. Live stock data fetched from Yahoo Finance via yfinance. Groq\'s cloud API powers sub-second LLaMA 3.3-70B sentiment inference — results delivered in under 300ms.',
+    tools: ['VS Code', 'Git', 'Postman', 'Vite', 'Jupyter Notebook', 'Chrome DevTools'],
+    features: [
+      'Real-time stock price forecasting via TimesFM 2.5 (200M params, fully local)',
+      'Sentiment analysis pipeline powered by Groq LLaMA 3.3-70B',
+      'Hybrid Signal Fusion Layer — 70% quantitative + 30% sentiment weighting',
+      'BUY / SELL / HOLD signal output with per-signal confidence scores',
+      'Interactive Recharts time-series visualisation dashboard',
+      'Async SQLite data layer (AioSQLite) for non-blocking I/O',
+      'REST API backend via FastAPI with live price streaming'
+    ]
+  },
+  hiremind: {
+    num: '02',
+    title: 'HireMind',
+    role: 'Full-Stack Developer · Final Year Project',
+    period: 'Jan – Apr 2026',
+    image: 'hiremind.pic.jpeg',
+    desc: 'Full-stack AI-powered campus placement platform built as the Final Year Project at SASTRA University. Supports four roles — Student, Recruiter, Placement Officer, and Admin — each with purpose-built dashboards. Students get AI-powered resume analysis, personalised skill-gap recommendations, a 24/7 AI career coach powered by Groq, and an ML-based placement likelihood predictor trained with scikit-learn.',
+    stack: ['Next.js 16', 'TypeScript', 'Tailwind CSS v4', 'Zustand', 'TanStack Query', 'Django 4.2', 'DRF', 'Django Channels', 'Groq LLaMA 3', 'scikit-learn', 'PostgreSQL', 'Supabase', 'Celery', 'Redis', 'Vercel', 'Railway'],
+    cloudDetails: 'Frontend on Vercel with auto CI/CD from GitHub — zero-downtime on every push. Django 4.2 backend + PostgreSQL + Redis all hosted on Railway with persistent volumes. Supabase stores resume PDFs and profile images. Django Channels powers real-time WebSocket notifications via Railway\'s persistent process model. Celery workers run async on Railway for background ML scoring and email jobs.',
+    tools: ['VS Code', 'Git', 'GitHub', 'Postman', 'Figma', 'pgAdmin', 'Railway CLI', 'Vercel CLI', 'pdfplumber'],
+    features: [
+      'AI resume parsing and scoring via pdfplumber + Groq LLaMA 3',
+      'Skill-gap analyser with personalised course recommendations',
+      '24/7 AI career coach — streaming LLM chat interface',
+      'ML placement predictor built with scikit-learn (classification model)',
+      'Multi-role dashboards: Student · Recruiter · Placement Officer · Admin',
+      'Real-time notifications via Django Channels (WebSocket)',
+      'Async task queue with Celery + Redis for background processing',
+      'Deployed on Vercel (frontend) + Railway (backend · DB · Redis)'
+    ]
+  },
+  lumadot: {
+    num: '03',
+    title: 'luma.dot',
+    role: 'Solo Developer',
+    period: 'Mar – Apr 2026',
+    image: 'luma.pic.jpeg',
+    desc: 'Bloomberg-style dark AI news reader for iOS, Android and Web — built with React Native and Expo SDK 54. Features a unique 3D tilt field-selector driven by device gyroscope, live AI-powered article summarisation via Groq LLaMA 3.3-70B, real-time sentiment labelling, and a RAG-based chat interface to ask questions about any article. Deployed to both Vercel (web) and AWS Amplify (mobile).',
+    stack: ['React Native', 'Expo SDK 54', 'TypeScript', 'Groq API', 'NewsAPI', 'AsyncStorage', 'EAS Build', 'Vercel', 'AWS Amplify'],
+    cloudDetails: 'Web version deployed on Vercel Edge Network — instant global CDN delivery. Mobile builds compiled via EAS Build (Expo Application Services) for iOS TestFlight and Android APK. AWS Amplify manages mobile hosting and OTA (over-the-air) updates — pushing live fixes without App Store resubmission. Groq API handles LLaMA 3.3-70B article summarisation in under 500ms.',
+    tools: ['VS Code', 'Git', 'Expo CLI', 'EAS CLI', 'Vercel CLI', 'AWS Amplify Console', 'Postman', 'Xcode Simulator'],
+    features: [
+      'Live news feed across 6 domains: Tech · Finance · AI · Politics · Science · Health',
+      'AI article summarisation — Groq LLaMA 3.3-70B, streamed in real time',
+      'Per-article sentiment analysis (Positive / Neutral / Negative labels)',
+      'RAG-based article chat — ask questions about any story',
+      '3D tilt field-selector with perspective-linked gyroscope animation',
+      'Bookmarks system with AsyncStorage offline persistence',
+      'Cross-platform: iOS · Android · Web from a single React Native codebase'
+    ]
+  },
+  streakify: {
+    num: '04',
+    title: 'Streakify',
+    role: 'Solo Developer',
+    period: '2025',
+    image: 'streakify.jpeg',
+    desc: 'Dark luxury habit-tracking platform built in pure vanilla HTML5, CSS3 and ES6 — zero dependencies, zero frameworks, zero build tools. Features "Aria", an AI assistant visualised as five nested CSS 3D spheres that pulse and breathe with activity, a LERP-interpolated custom cursor running at a silky 60fps, and complete offline data persistence via localStorage.',
+    stack: ['HTML5', 'CSS3', 'ES6', 'CSS 3D Transforms', 'LocalStorage', 'Canvas API', 'Web Animations API'],
+    cloudDetails: 'Zero-backend, fully static architecture — the entire app is a single HTML5 file with embedded CSS and JS. No server, no API, no build step. All data persisted in browser localStorage for offline-first operation. Deployable to any static host instantly: Netlify drag-and-drop, GitHub Pages single push, or Vercel CLI in seconds. Zero cold-start time, zero server costs, infinitely CDN-scalable.',
+    tools: ['VS Code', 'Git', 'Chrome DevTools', 'Firefox DevTools', 'CSS Animation Inspector'],
+    features: [
+      '"Aria" AI assistant — five nested CSS 3D spheres with live pulse animation',
+      'LERP-interpolated custom cursor at 60fps for buttery smooth tracking',
+      'Habit tracking engine with streak calculation and visual history grid',
+      'Offline-first persistence via localStorage — no backend, no account required',
+      'Dark luxury aesthetic with custom keyframe CSS animations throughout',
+      'Zero dependencies — every pixel and interaction written from scratch'
+    ]
+  }
+};
+
+function openProjectModal(key) {
+  const p = projectData[key];
+  if (!p) return;
+
+  const body = document.getElementById('proj-modal-body');
+  const modalInner = document.querySelector('.proj-modal-inner');
+
+  body.innerHTML = `
+    <p class="proj-modal-num">${p.num} / 04</p>
+    <h2 class="proj-modal-title">${p.title}</h2>
+    <div class="proj-modal-meta">
+      <div class="proj-modal-meta-item">
+        <label>Role</label>
+        <span>${p.role}</span>
+      </div>
+    </div>
+    <img class="proj-modal-img" src="${p.image}" alt="${p.title}" loading="lazy">
+    <div class="proj-modal-section">
+      <p class="proj-modal-section-label">About This Project</p>
+      <p class="proj-modal-desc">${p.desc}</p>
+    </div>
+    <div class="proj-modal-section">
+      <p class="proj-modal-section-label">&#9729; Cloud &amp; Infrastructure</p>
+      <p class="proj-modal-cloud">${p.cloudDetails}</p>
+    </div>
+    <div class="proj-modal-two-col">
+      <div class="proj-modal-section">
+        <p class="proj-modal-section-label">Tech Stack</p>
+        <div class="proj-modal-tags">${p.stack.map(t => `<span class="proj-modal-tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="proj-modal-section">
+        <p class="proj-modal-section-label">Tools Used</p>
+        <div class="proj-modal-tags">${p.tools.map(t => `<span class="proj-modal-tag proj-modal-tag-tool">${t}</span>`).join('')}</div>
+      </div>
+    </div>
+    <div class="proj-modal-section">
+      <p class="proj-modal-section-label">Key Features</p>
+      <ul class="proj-modal-features">${p.features.map(f => `<li>${f}</li>`).join('')}</ul>
+    </div>
+  `;
+
+  // Reset scroll to top
+  modalInner.scrollTop = 0;
+
+  const modal = document.getElementById('proj-modal');
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  lenis.stop();
+}
+
+function closeProjectModal() {
+  const modal = document.getElementById('proj-modal');
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  lenis.start();
+}
+
+document.getElementById('proj-modal-close').addEventListener('click', closeProjectModal);
+document.getElementById('proj-modal-backdrop').addEventListener('click', closeProjectModal);
+
+// Prevent wheel events inside modal from bubbling to Lenis
+document.querySelector('.proj-modal-inner').addEventListener('wheel', (e) => {
+  e.stopPropagation();
+}, { passive: true });
+
+document.querySelectorAll('.proj-card[data-project]').forEach(card => {
+  card.addEventListener('click', () => openProjectModal(card.dataset.project));
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeProjectModal();
+});
+
+</script>
+</body>
+</html>
