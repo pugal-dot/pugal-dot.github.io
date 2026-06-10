@@ -1007,6 +1007,9 @@
       .cursor-dot, .cursor-ring { display: none; }
       body { cursor: auto; }
 
+      /* ── preloader ── */
+      .loader { padding: 2.4rem 2rem 4rem; }
+
       /* ── header ── */
       .site-header { padding: 1.8rem 2rem; }
       .header-tagline { display: none; }
@@ -1020,7 +1023,7 @@
         min-height: 100svh;
       }
       .hero-name {
-        font-size: clamp(5.5rem, 18vw, 9rem);
+        font-size: clamp(4rem, 12.5vw, 9rem);
         letter-spacing: -.03em;
         line-height: .92;
       }
@@ -1032,8 +1035,14 @@
       }
       .hero-contact-sep { display: none; }
       .hero-contact-link { font-size: 1.3rem; }
-      .hero-meta { flex-direction: column; gap: .4rem; margin-top: 2rem; }
-      .hero-scroll-hint { bottom: 3rem; font-size: 1rem; }
+      .hero-meta {
+        position: static;
+        text-align: left;
+        gap: .4rem;
+        margin-top: 2rem;
+      }
+      .hero-social-links { justify-content: flex-start; }
+      .hero-scroll-hint { bottom: 3rem; left: 2rem; font-size: 1rem; }
 
       /* ── intro ── */
       .intro-section { padding: 6rem 2rem; }
@@ -1041,14 +1050,19 @@
         font-size: clamp(1.6rem, 4.5vw, 2.6rem);
         line-height: 1.45;
       }
+      .intro-text br { display: none; }
 
       /* ── about overlay ── */
       .about-overlay {
         width: 100%;
+        height: 100dvh;
         padding: 6rem 2rem 4rem;
       }
       .about-section-grid { grid-template-columns: 1fr; gap: 2.4rem; }
       .about-bio { font-size: 1.4rem; line-height: 1.6; }
+
+      /* ── section headers align with list items ── */
+      .sec-header { padding: 0; margin-bottom: 3.2rem; }
 
       /* ── education ── */
       .edu-section { padding: 6rem 2rem 4rem; }
@@ -1071,16 +1085,25 @@
       .proj-card {
         border-right: none !important;
         border-bottom: 1px solid rgba(240,240,240,.08);
+        aspect-ratio: auto;
+        display: flex;
+        flex-direction: column;
       }
       .proj-card-placeholder { height: 56vw; }
-      .proj-card-overlay { padding: 1.6rem; }
-      .proj-card-title { font-size: 1.8rem; }
-      .proj-card-desc { font-size: 1.1rem; display: block; opacity: 1; transform: none; }
-      .proj-card-cta { font-size: 1rem; }
+      .proj-card-img { filter: brightness(.8); }
+      .proj-card-overlay {
+        position: static;
+        background: none;
+        padding: 1.8rem 2rem 2.6rem;
+      }
+      .proj-card-title { font-size: 2rem; }
+      .proj-card-desc { font-size: 1.2rem; display: block; opacity: 1; transform: none; }
+      .proj-card-cta { font-size: 1rem; opacity: 1; transform: none; }
 
       /* ── project modal ── */
       .proj-modal-inner {
         width: 100%;
+        height: 100dvh;
         padding: 2.4rem 2rem 5rem;
         max-height: 100dvh;
         overflow-y: auto;
@@ -1131,7 +1154,7 @@
 
     /* extra small phones */
     @media (max-width: 390px) {
-      .hero-name { font-size: 14vw; }
+      .hero-name { font-size: 12vw; }
       .intro-text { font-size: 1.5rem; }
       .projects-giant-title { font-size: 19vw; }
     }
@@ -1898,22 +1921,3 @@ function closeProjectModal() {
   lenis.start();
 }
 
-document.getElementById('proj-modal-close').addEventListener('click', closeProjectModal);
-document.getElementById('proj-modal-backdrop').addEventListener('click', closeProjectModal);
-
-// Prevent wheel events inside modal from bubbling to Lenis
-document.querySelector('.proj-modal-inner').addEventListener('wheel', (e) => {
-  e.stopPropagation();
-}, { passive: true });
-
-document.querySelectorAll('.proj-card[data-project]').forEach(card => {
-  card.addEventListener('click', () => openProjectModal(card.dataset.project));
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeProjectModal();
-});
-
-</script>
-</body>
-</html>
