@@ -1921,3 +1921,23 @@ function closeProjectModal() {
   lenis.start();
 }
 
+document.getElementById('proj-modal-close').addEventListener('click', closeProjectModal);
+document.getElementById('proj-modal-backdrop').addEventListener('click', closeProjectModal);
+
+// Prevent wheel events inside modal from bubbling to Lenis
+document.querySelector('.proj-modal-inner').addEventListener('wheel', (e) => {
+  e.stopPropagation();
+}, { passive: true });
+
+document.querySelectorAll('.proj-card[data-project]').forEach(card => {
+  card.addEventListener('click', () => openProjectModal(card.dataset.project));
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeProjectModal();
+});
+
+</script>
+<!-- build 2026-06-10 -->
+</body>
+</html>
